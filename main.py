@@ -104,7 +104,7 @@ async def status(ctx):
     else:
         await ctx.message.reply(f"You need to log in with `{bot.command_prefix}spotify_login` before using this command.",delete_after=120)
 
-@bot.command(name='toggle_listen')
+@bot.command(name='toggle_listen',brief="Toggles Listening status")
 async def toggle_listen(ctx):
     global GLOBAL_COUNT
     user_id = ctx.author.id
