@@ -53,7 +53,7 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send(f"Sorry, the command `{ctx.message.content}` is not recognized. Please use `!help` to see available commands.")
+        await ctx.send(f"Sorry, the command `{ctx.message.content}` is not recognized. Please use `!help` to see available commands.",delete_after=120)
     else:
         print(f"An error occurred: {type(error).__name__}, {error}")
 
@@ -80,7 +80,7 @@ async def on_message(message):
         if match:
             track_id = match.group(1)
             # await add_track_to_playlist(track_id)     #have to implement
-            await message.reply(f"Added Spotify track with ID {track_id} to the playlist!")
+            await message.reply(f"Added Spotify track with ID {track_id} to the playlist!",delete_after=120)
 
     # await bot.process_commands(message)
 
@@ -92,7 +92,7 @@ async def ping(ctx):
 async def status(ctx):
     user_id = ctx.author.id
     if user_id in users:
-        await ctx.message.reply(f"Listening status: {'listening' if users[user_id]['flag'] else 'not listening'}.")
+        await ctx.message.reply(f"Listening status: {'listening' if users[user_id]['flag'] else 'not listening'}.",delete_after=120)
     else:
         await ctx.message.reply(f"You need to log in with `{bot.command_prefix}spotify_login` before using this command.",delete_after=120)
 
@@ -105,7 +105,7 @@ async def toggle_listen(ctx):
         # print(users[user_id]["flag"])
         users[user_id]["flag"] = not users[user_id]["flag"]  # Toggle the flag (1 to 0 or 0 to 1)
         # print(users[user_id]["flag"],end="\n\n")
-        await ctx.message.reply(f"Listening flag toggled. Now {'listening' if users[user_id]['flag'] else 'not listening'}.")
+        await ctx.message.reply(f"Listening flag toggled. Now {'listening' if users[user_id]['flag'] else 'not listening'}.",delete_after=120)
     else:
         await ctx.message.reply(f"You need to log in with `{bot.command_prefix}spotify_login` before using this command.",delete_after=120)
 
@@ -140,13 +140,13 @@ async def spotify_login(ctx):
                 await ctx.author.send("Failed to get access token.",delete_after=120)
         except spotipy.SpotifyOauthError as oauth_error:
             if "invalid_grant" in str(oauth_error):
-                await ctx.author.send("Error during Spotify authentication: The provided authorization code is invalid. Please initiate the login process again.")
+                await ctx.author.send("Error during Spotify authentication: The provided authorization code is invalid. Please initiate the login process again.",delete_after=120)
             else:
-                await ctx.author.send(f"Error during Spotify authentication: {oauth_error}. Please try again after sometime.")
+                await ctx.author.send(f"Error during Spotify authentication: {oauth_error}. Please try again after sometime.",delete_after=120)
         except TimeoutError:
             await ctx.author.send("Login timeout. Please try again.",delete_after=120)
     except spotipy.SpotifyException as e:
-        await ctx.author.send(f"Error during Spotify authentication: {e}. [Please note that this application is currently in development mode, and access is limited to users registered on the app's dashboard. The app can accommodate a maximum of 25 users, and only those registered users have access to this bot. If you want to use it, please DM the creator your Spotify email.]")
+        await ctx.author.send(f"Error during Spotify authentication: {e}. [Please note that this application is currently in development mode, and access is limited to users registered on the app's dashboard. The app can accommodate a maximum of 25 users, and only those registered users have access to this bot. If you want to use it, please DM the creator your Spotify email.]",delete_after=120)
 
 @bot.command(name='playlists',brief="Lists your playlists")
 async def playlists(ctx):
