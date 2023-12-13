@@ -29,7 +29,7 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-sp_oauth = SpotifyPKCE(client_id=SPOTIPY_CLIENT_ID,redirect_uri=SPOTIPY_REDIRECT_URI,scope="playlist-modify-private",cache_handler=spotipy.MemoryCacheHandler())
+# sp_oauth = SpotifyPKCE(client_id=SPOTIPY_CLIENT_ID,redirect_uri=SPOTIPY_REDIRECT_URI,scope="playlist-modify-private",cache_handler=spotipy.MemoryCacheHandler())
 
 cipher_suite = Fernet(KEY.encode())
 
@@ -121,6 +121,9 @@ async def toggle_listen(ctx):
 async def spotify_login(ctx):
     global GLOBAL_COUNT
     try:
+        # Create a new instance of SpotifyPKCE for each user
+        sp_oauth = SpotifyPKCE(client_id=SPOTIPY_CLIENT_ID, redirect_uri=SPOTIPY_REDIRECT_URI, scope="playlist-modify-private")
+
         auth_url = sp_oauth.get_authorize_url()
         await ctx.author.send(f'Click [here]({auth_url}) to log in to Spotify.',delete_after=120)
         await ctx.author.send("Paste the code from the redirect URL:",delete_after=120)
