@@ -122,7 +122,7 @@ async def spotify_login(ctx):
     global GLOBAL_COUNT
     try:
         # Create a new instance of SpotifyPKCE for each user
-        sp_oauth = SpotifyPKCE(client_id=SPOTIPY_CLIENT_ID, redirect_uri=SPOTIPY_REDIRECT_URI, scope="playlist-modify-private")
+        sp_oauth = SpotifyPKCE(client_id=SPOTIPY_CLIENT_ID, redirect_uri=SPOTIPY_REDIRECT_URI, scope="playlist-modify-private",cache_handler=spotipy.MemoryCacheHandler())
 
         auth_url = sp_oauth.get_authorize_url()
         await ctx.author.send(f'Click [here]({auth_url}) to log in to Spotify.',delete_after=120)
@@ -149,13 +149,15 @@ async def spotify_login(ctx):
                 await ctx.author.send("Please delete the previous messages for security reasons.",delete_after=120)
             else:
                 await ctx.author.send("Failed to get access token.",delete_after=120)
+                print(users)
+        except TimeoutError:
+            await ctx.author.send("Login timeout. Please try again.",delete_after=120)
         except spotipy.SpotifyOauthError as oauth_error:
             if "invalid_grant" in str(oauth_error):
                 await ctx.author.send("Error during Spotify authentication: The provided authorization code is invalid. Please initiate the login process again.",delete_after=120)
             else:
                 await ctx.author.send(f"Error during Spotify authentication: {oauth_error}. Please try again after sometime.",delete_after=120)
-        except TimeoutError:
-            await ctx.author.send("Login timeout. Please try again.",delete_after=120)
+        
     except spotipy.SpotifyException as e:
         await ctx.author.send(f"Error during Spotify authentication: {e}. [Please note that this application is currently in development mode, and access is limited to users registered on the app's dashboard. The app can accommodate a maximum of 25 users, and only those registered users have access to this bot. If you want to use it, please DM the creator your Spotify email.]",delete_after=120)
 
