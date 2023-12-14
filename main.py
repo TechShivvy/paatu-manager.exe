@@ -149,7 +149,7 @@ async def spotify_login(ctx):
                 await ctx.author.send("Please delete the previous messages for security reasons.",delete_after=120)
             else:
                 await ctx.author.send("Failed to get access token.",delete_after=120)
-                print(users)
+            # print(users)
         except TimeoutError:
             await ctx.author.send("Login timeout. Please try again.",delete_after=120)
         except spotipy.SpotifyOauthError as oauth_error:
