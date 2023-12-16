@@ -521,7 +521,7 @@ async def spotify_login(ctx):
             await ctx.message.reply(
                 random.choice(
                     [
-                        "I just slid into your DMs with the Spotify login link. Check it out!",
+                        "I just slid into your DMs with the Spotify login link ;). Check it out!",
                         "Sent you a quick DM with the Spotify login link. Go grab it!",
                         "Check your DMs for the Spotify login link. I gotchu!",
                         "Yo, just dropped the Spotify login link in your DMs. Take a look!",
@@ -700,7 +700,13 @@ async def playlists(ctx):
 
 class CustomHelpCommand(commands.DefaultHelpCommand):
     async def send_bot_help(self, mapping):
-        embed = discord.Embed(title="Available Commands", color=0x3498DB)
+        embed = discord.Embed(title="Available Commands:", color=0x3498DB)
+
+        embed.add_field(
+            name="About:",
+            value="Yo, I'm your paatu-manager 🎶! I only vibe with Spotify song links for now (not playlists or tracks; my boss is thinking of adding YouTube too). Drop those links, and I'll add them to playlists. Let's make this server bumpin'!",
+            inline=False,
+        )
 
         for command in bot.commands:
             embed.add_field(
@@ -708,15 +714,21 @@ class CustomHelpCommand(commands.DefaultHelpCommand):
                 value=command.brief or "Shows this Message",
                 inline=True,
             )
+        
         embed.add_field(
-            name="Important Note:",
-            value="This application is currently in development mode. Access is limited to users registered on the app's dashboard. The app can accommodate a maximum of 25 users, and only those registered users have access to this bot. If you want to use it, please DM the creator your Spotify email.",
+            name="Fun Fact:",
+            value="Oh, and let me spill some tea - chief is still deciding if YouTube tracks are cool enough. Imagine, right?",
+            inline=False,
+        )
+
+        embed.add_field(
+            name="IMPORTANT NOTE:",
+            value="This bot's in development. Limited to 25 spotify users on the dashboard. Only they can access. Wanna join? DM my boss your Spotify email.",
             inline=False,
         )
 
         channel = self.get_destination()
         await channel.send(embed=embed)
-
 
 def main():
     signal.signal(signal.SIGINT, exit_handler)
