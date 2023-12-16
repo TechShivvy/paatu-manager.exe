@@ -18,6 +18,8 @@ from spotipy.oauth2 import SpotifyPKCE
 
 import pickle
 
+import random
+
 from cryptography.fernet import Fernet
 
 load_dotenv()
@@ -43,7 +45,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 cipher_suite = Fernet(Fernet.generate_key())
 
-
+# have to implement
 # class ServerStore:
 #     def __init__(self):
 #         self.servers = {}
@@ -177,15 +179,6 @@ class UserStore:
             print(f"user not found: {id}")
             return 0
 
-    def set_user_flag(self, id, url):
-        if id in self.users:
-            self.users[id]["url"] = url
-            print(f"added URL to user {id}: {url}")
-            return 1
-        else:
-            print(f"user not found: {id}")
-            return 0
-
     def __del__(self):
         print("user destructor: class object deleted")
 
@@ -223,7 +216,7 @@ def decrypt_data(data):
 
 
 async def add_track_to_playlists(server_name, channel_name, track_id):
-    has_run_once=False
+    has_run_once = False
     for listener in usersdb.get_active_listeners():
         playlist_name = f"{server_name}/{channel_name}"
         playlist_id = usersdb.get_playlist_id(listener, playlist_name)
@@ -242,9 +235,7 @@ async def add_track_to_playlists(server_name, channel_name, track_id):
                 if len(playlists["items"]) == 0 or playlist_id is not False:
                     break
 
-            # If the playlist doesn't exist, create it
             if playlist_id is False:
-                # print("not there in profile")
                 playlist = sp.user_playlist_create(
                     sp.current_user()["id"],
                     playlist_name,
@@ -258,11 +249,10 @@ async def add_track_to_playlists(server_name, channel_name, track_id):
         playlist_tracks = sp.playlist_tracks(playlist_id)
         existing_track_ids = [item["track"]["id"] for item in playlist_tracks["items"]]
 
-        # Check if the track is already in the playlist
         if track_id in existing_track_ids:
             # print(f"Track with ID {track_id} is already in the playlist.")
             return False
-        # Add the track to the playlist
+
         sp.playlist_add_items(playlist_id, [track_id])
         usersdb.set_playlist_id(listener, playlist_name, playlist_id)
         del sp
@@ -322,14 +312,15 @@ async def on_message(message):
             await command(ctx)
         return
 
-    # if message.channel.id not in SPECIFIED_CHANNELS:     #have to implement
+    # have to implement
+    # if message.channel.id not in SPECIFIED_CHANNELS:
     #     return
 
     # if GLOBAL_COUNT == 0:
     #     return
 
     words = message.content.split()
-    
+
     for word in words:
         if "!https://open.spotify.com/track/" in word:
             return
@@ -345,7 +336,7 @@ async def on_message(message):
             )
             if result:
                 await message.reply(
-                    f"track added to playlist!",
+                    f"track added to playlists!",
                     mention_author=False,
                     delete_after=120,
                 )
@@ -353,9 +344,9 @@ async def on_message(message):
     del words
 
 
-@bot.command(name="ping", brief="To check Bot's Status")
-async def ping(ctx):
-    await ctx.message.reply("Pong!", delete_after=120)
+# @bot.command(name="ping", brief="To check Bot's Status")
+# async def ping(ctx):
+#     await ctx.message.reply("Pong!", delete_after=120)
 
 
 @bot.command(name="status", brief="Shows listening status")
@@ -363,11 +354,19 @@ async def status(ctx):
     flag = usersdb.get_flag(ctx.author.id)
     if flag is not None:
         await ctx.message.reply(
-            "listening" if flag else "not listening", delete_after=120
+            "listening ^.^" if flag else "not listening :(", delete_after=120
         )
     else:
         await ctx.message.reply(
-            f"You need to log in with `{bot.command_prefix}spotify_login` before using this command.",
+            random.choice(
+                [
+                    f"Bruh, you gotta log in with `{bot.command_prefix}spotify_login` first.",
+                    f"Yo, hit up `{bot.command_prefix}spotify_login` before using this command.",
+                    f"Bro, log in using `{bot.command_prefix}spotify_login` real quick.",
+                    f"Fam, make sure to `{bot.command_prefix}spotify_login` before using this command.",
+                    f"You need to log in with `{bot.command_prefix}spotify_login` before using this command.",
+                ]
+            ),
             delete_after=120,
         )
 
@@ -380,12 +379,20 @@ async def toggle(ctx):
         GLOBAL_COUNT += -1 if flag else 1
         usersdb.toggle_flag(ctx.author.id)
         await ctx.message.reply(
-            f"Listening flag toggled. Now {'listening' if not flag else 'not listening'}.",
+            f"Listening flag toggled. Now **{'listening' if not flag else 'not listening'}**.",
             delete_after=120,
         )
     else:
         await ctx.message.reply(
-            f"You need to log in with `{bot.command_prefix}spotify_login` before using this command.",
+            random.choice(
+                [
+                    f"Bruh, you gotta log in with `{bot.command_prefix}spotify_login` first.",
+                    f"Yo, hit up `{bot.command_prefix}spotify_login` before using this command.",
+                    f"Bro, log in using `{bot.command_prefix}spotify_login` real quick.",
+                    f"Fam, make sure to `{bot.command_prefix}spotify_login` before using this command.",
+                    f"You need to log in with `{bot.command_prefix}spotify_login` before using this command.",
+                ]
+            ),
             delete_after=120,
         )
 
@@ -400,29 +407,12 @@ async def toggle(ctx):
 #         await ctx.message.reply("Channel already added", delete_after=120)
 
 
-@bot.command(name="init", brief="init master account")
+@bot.command(name="init", brief="init bot account")
 # @commands.is_owner()
 async def init(ctx):
     if ctx.author.id == int(CREATOR_ID):
         await ctx.send("!spotify_login")
-        # ctx.author.id = bot.user.id
-        # print(ctx.author.id)
-        # await spotify_login(ctx)
-        # await ctx.send('!spotify_login')
-        # fake_ctx = await bot.get_context(fake_message)
-        # await bot.invoke(fake_ctx)
-        # command_message = await ctx.send('!ping')
 
-        # # Create a fake context for the command
-        # fake_ctx = await bot.get_context(command_message)
-
-        # # Process the command using the bot's command processing logic
-        # await bot.invoke(fake_ctx)
-
-        # command = bot.get_command('spotify_login')
-        # await command(ctx)
-
-        # Wait for the bot to respond to the !spotify_login command
         def check(message):
             # print(message)
             return (
@@ -458,17 +448,19 @@ async def init(ctx):
 async def togglee(ctx):
     if ctx.author.id == int(CREATOR_ID):
         await ctx.send("!toggle_listen")
-    
+
+
 @bot.command(name="!status", brief="status for bot")
 # @commands.is_owner()
 async def togglee(ctx):
     if ctx.author.id == int(CREATOR_ID):
         await ctx.send("!status")
 
+
 # async def fetch_
 
 
-@bot.command(name="plelists", brief="List this server's playlists")
+@bot.command(name="plelists", brief="List this bot's playlists")
 async def plelists(ctx):
     embed = discord.Embed(title="Bot's Playlists", color=0x1DB954)
 
@@ -498,14 +490,25 @@ async def spotify_login(ctx):
             # print(user.id)
             await user.send(
                 f"Click [here]({auth_url}) to log in to Spotify.\n"
-                + "If you approve, it will redirect you to a 404 page.\n"
-                + "Paste the redirect URL:",
+                + "If you approve, it will redirect you to a 404 site.\n"
+                + "Paste the entire redirect URL:",
                 delete_after=120,
             )
             await ctx.message.reply(
-                "I have sent my boss the Spotify login link.Please wait for him to log me in",
+                random.choice(
+                    [
+                        "Yo boss, just dropped the Spotify login link. Hook me up with that login, fam. The rest of y'all, sit tight and grab some popcorn.",
+                        "Ayy chief, check your DMs for the Spotify login link. Slide into that login real quick. Others, be patient, your turn is coming.",
+                        "Hey big shot, I shot you the Spotify login link. Log me in, fam, or I'll start playing Justin Bieber on loop. Others, chill for a sec, let the boss handle business.",
+                        "Listen up, boss. Just tossed you the Spotify login link. Get on it and log me in, alright? Others, sit tight.",
+                        "Oi, chief! Check your DMs for the Spotify login link. Get in there and log me in, pronto. The rest of you, hold your horses.",
+                        "Hey, big shot! I sent you the Spotify login link. Time to get your act together and log me in. Others, just hang in there for a sec.",
+                        "Hey you! Spotify login link in your DMs. Quit messing around and log me in. The others can wait.",
+                    ]
+                ),
                 delete_after=120,
             )
+
         else:
             await ctx.author.send(
                 f"Click [here]({auth_url}) to log in to Spotify.\n"
@@ -516,7 +519,16 @@ async def spotify_login(ctx):
             # await ctx.author.send('''If u approve, it will redirect u to a 404 page''',delete_after=120)
             # await ctx.author.send("Paste the redirect URL",delete_after=120)
             await ctx.message.reply(
-                "I have sent you a dm with the Spotify login link.", delete_after=120
+                random.choice(
+                    [
+                        "I just slid into your DMs with the Spotify login link. Check it out!",
+                        "Sent you a quick DM with the Spotify login link. Go grab it!",
+                        "Check your DMs for the Spotify login link. I gotchu!",
+                        "Yo, just dropped the Spotify login link in your DMs. Take a look!",
+                        "Your DMs just got blessed with the Spotify login link. Go and fking grab it!",
+                    ]
+                ),
+                delete_after=120,
             )
 
         # and message.guild.id == ctx.guild.id and message.channel.id == ctx.channel.id
@@ -551,6 +563,13 @@ async def spotify_login(ctx):
                         "Please delete the url for security reasons.", delete_after=120
                     )
                     await ctx.send("IM INNNNN BISSHHESS!")
+                    await ctx.send(random.choice([
+                        "From now on, I'll be adding all the songs you share in this server to my playlist. And guess what? Others who are logged in to me? Their playlists too. Better watch what you drop, it's going straight into the hall of bangers!",
+                        "Alright, listen up! Starting today, every track you share here is going straight into my playlist. Oh, and everyone else who's logged in? Yeah, their playlists too. Choose wisely, or suffer the consequences!",
+                        "You just stepped into my world. Every song you drop here is now in my playlist. So, share wisely, or prepare for a symphony of regret!",
+                    ]),
+                    delete_after=120)
+
                 else:
                     await ctx.author.send(
                         f"Logged in as: {user_info['display_name']} (ID: {user_info['id']})",
@@ -624,9 +643,21 @@ async def spotify_login(ctx):
 @bot.command(name="spotify_logout", brief="Logout from Spotify")
 async def spotify_logout(ctx):
     await ctx.message.reply(
-        "Logged out!"
+        random.choice(
+            [
+                "Logged the fook out!",
+                "You're out, bich! Logout successful.",
+                "Logout complete, motherfather!",
+                "Peace out ho! You're logged the f out.",
+            ]
+        )
         if usersdb.del_user(ctx.author.id)
-        else "mothafucka u r not logged in to logout",
+        else random.choice(
+            [
+                "Bruh, you ain't even logged in to logout. Get it together.",
+                "mothafucka u r not logged in to logout",
+            ]
+        ),
         delete_after=120,
     )
 
@@ -654,7 +685,15 @@ async def playlists(ctx):
         del sp
     else:
         await ctx.message.reply(
-            f"You need to log in with `{bot.command_prefix}spotify_login` before using this command.",
+            random.choice(
+                [
+                    f"Bruh, you gotta log in with `{bot.command_prefix}spotify_login` first.",
+                    f"Yo, hit up `{bot.command_prefix}spotify_login` before using this command.",
+                    f"Bro, log in using `{bot.command_prefix}spotify_login` real quick.",
+                    f"Fam, make sure to `{bot.command_prefix}spotify_login` before using this command.",
+                    f"You need to log in with `{bot.command_prefix}spotify_login` before using this command.",
+                ]
+            ),
             delete_after=120,
         )
 
@@ -680,12 +719,10 @@ class CustomHelpCommand(commands.DefaultHelpCommand):
 
 
 def main():
-    # Register exit signals
     signal.signal(signal.SIGINT, exit_handler)
     signal.signal(signal.SIGTERM, exit_handler)
 
     try:
-        # bot = setup_and_run_bot()
         bot.help_command = CustomHelpCommand()
         bot.run(DISCORD_BOT_ID)
 
