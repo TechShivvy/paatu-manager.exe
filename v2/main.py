@@ -357,10 +357,10 @@ async def on_message(message):
             ctx = await bot.get_context(message)
             command = bot.get_command("status")
             await command(ctx)
-        elif message.content == "!playlists":
-            ctx = await bot.get_context(message)
-            command = bot.get_command("playlists")
-            await command(ctx)
+        # elif message.content == "!playlists":
+        #     ctx = await bot.get_context(message)
+        #     command = bot.get_command("playlists")
+        #     await command(ctx)
         elif message.content == "!spotify_logout":
             ctx = await bot.get_context(message)
             command = bot.get_command("spotify_logout")
@@ -515,38 +515,32 @@ async def togglee(ctx):
 
 @bot.command(name="!status", brief="status for bot")
 # @commands.is_owner()
-async def togglee(ctx):
+async def statuss(ctx):
     if ctx.author.id == int(CREATOR_ID):
         await ctx.send("!status")
 
-@bot.command(name="!spotify_logout", brief="status for bot")
+@bot.command(name="!spotify_logout", brief="spotify logout 4 bot")
 # @commands.is_owner()
-async def togglee(ctx):
+async def spotify_logoutt(ctx):
     if ctx.author.id == int(CREATOR_ID):
         await ctx.send("!spotify_logout")
-
-@bot.command(name="!playlists", brief="status for bot")
-# @commands.is_owner()
-async def togglee(ctx):
-    if ctx.author.id == int(CREATOR_ID):
-        await ctx.send("!playlists")
 
 # async def fetch_
 
 
-# @bot.command(name="!playlists", brief="List this bot's playlists")
-# async def playylists(ctx):
-#     embed = discord.Embed(title="Bot's Playlists", color=0x1DB954)
-#     if not usersdb.get_user(bot.user.id):
-#         await ctx.message.reply("Bot is not logged in yet :(", delete_after=120)
-#         return
-#     for playlist_name, playlist_id in usersdb.get_playlist_ids(bot.user.id).items():
-#         embed.add_field(
-#             name=playlist_name,
-#             value=f"[Open Playlist](https://open.spotify.com/playlist/{playlist_id})",
-#             inline=False,
-#         )
-#     await ctx.message.reply(embed=embed, delete_after=120)
+@bot.command(name="!playlists", brief="List this bot's playlists")
+async def playylists(ctx):
+    embed = discord.Embed(title="Bot's Playlists", color=0x1DB954)
+    if not usersdb.get_user(bot.user.id):
+        await ctx.message.reply("Bot is not logged in yet :(", delete_after=120)
+        return
+    for playlist_name, playlist_id in usersdb.get_playlist_ids(bot.user.id).items():
+        embed.add_field(
+            name=playlist_name,
+            value=f"[Open Playlist](https://open.spotify.com/playlist/{playlist_id})",
+            inline=False,
+        )
+    await ctx.message.reply(embed=embed, delete_after=120)
 
 
 @bot.command(name="spotify_login", brief="Login to Spotify")
