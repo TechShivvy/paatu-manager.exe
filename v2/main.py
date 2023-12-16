@@ -149,7 +149,7 @@ class UserStore:
         if user_id in self.users:
             return self.users[user_id]["playlist_ids"]
         else:
-            return None
+            return {}
 
     def get_playlist_id(self, user_id, playlist_key):
         if user_id in self.users:
@@ -217,25 +217,51 @@ def decrypt_data(data):
 
 async def add_track_to_playlists(server_name, channel_name, track_id):
     has_run_once = False
+    # print(server_name,channel_name,track_id)
     for listener in usersdb.get_active_listeners():
+        # print(listener)
         playlist_name = f"{server_name}/{channel_name}"
         playlist_id = usersdb.get_playlist_id(listener, playlist_name)
+        print(playlist_id)
         sp = spotipy.Spotify(
             auth_manager=decrypt_data(usersdb.get_auth_manager(listener))
         )
         if playlist_id == False:
             # print("not there in db")
             for offset in range(0, 100001, 50):
+                print(1)
                 playlists = sp.current_user_playlists(limit=50, offset=offset)
+                if len(playlists["items"]) == 0 or playlist_id is not False:
+                    break
                 for playlist in playlists["items"]:
                     # print(playlist["name"])
+                    print("for2")
                     if playlist["name"] == playlist_name:
                         playlist_id = playlist["id"]
                         break
-                if len(playlists["items"]) == 0 or playlist_id is not False:
-                    break
 
             if playlist_id is False:
+                print("create1")
+                playlist = sp.user_playlist_create(
+                    sp.current_user()["id"],
+                    playlist_name,
+                    False,
+                    False,
+                    description=f"List of tracks shared in {channel_name} channel of {server_name} server",
+                )
+                # print(playlist)
+                playlist_id = playlist["id"]
+                del playlist
+        else:
+            try:
+                print("try")
+                print(sp.playlist(playlist_id))
+            except spotipy.exceptions.SpotifyException as e:
+                print("create2")
+                # Playlist does not exist, create a new one
+                print(
+                    f"Playlist with ID {playlist_id} does not exist. Creating a new one."
+                )
                 playlist = sp.user_playlist_create(
                     sp.current_user()["id"],
                     playlist_name,
@@ -244,17 +270,39 @@ async def add_track_to_playlists(server_name, channel_name, track_id):
                     description=f"List of tracks shared in {channel_name} channel of {server_name} server",
                 )
                 playlist_id = playlist["id"]
+                usersdb.set_playlist_id(listener, playlist_name, playlist_id)
                 del playlist
 
+        # existing_track_ids = []
+        # playlist_tracks = sp.playlist_tracks(playlist_id)
+        # if len(playlist_tracks["items"]):
+        #     existing_track_ids = [
+        #         item["track"]["id"] for item in playlist_tracks["items"]
+        #     ]
+        # else:
+        #     playlist = sp.user_playlist_create(
+        #         sp.current_user()["id"],
+        #         playlist_name,
+        #         False,
+        #         False,
+        #         description=f"List of tracks shared in {channel_name} channel of {server_name} server",
+        #     )
+        #     del playlist
+
+        print("here")
         playlist_tracks = sp.playlist_tracks(playlist_id)
+        print(playlist_tracks)
         existing_track_ids = [item["track"]["id"] for item in playlist_tracks["items"]]
+        # print(playlist_tracks)
+        print(existing_track_ids)
 
         if track_id in existing_track_ids:
             # print(f"Track with ID {track_id} is already in the playlist.")
-            return False
-
-        sp.playlist_add_items(playlist_id, [track_id])
-        usersdb.set_playlist_id(listener, playlist_name, playlist_id)
+            pass
+        else:
+            sp.playlist_add_items(playlist_id, [track_id])
+            usersdb.set_playlist_id(listener, playlist_name, playlist_id)
+            # print(usersdb.users[listener])
         del sp
         del playlist_id
         del playlist_name
@@ -275,7 +323,7 @@ async def on_ready():
         # serversdb.add_server(guild.id, guild.name)
         guild_count += 1
 
-    print("SampleDiscordBot is in " + str(guild_count) + " guilds.")
+    print("paatu-manager.exe is in " + str(guild_count) + " guilds.")
     print("------")
     print(f"Logged in as {bot.user.name} ({bot.user.id})")
     print("------")
@@ -295,7 +343,6 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     global GLOBAL_COUNT
-    await bot.process_commands(message)
 
     if message.author == bot.user:
         if message.content == "!spotify_login":
@@ -310,20 +357,34 @@ async def on_message(message):
             ctx = await bot.get_context(message)
             command = bot.get_command("status")
             await command(ctx)
+        elif message.content == "!playlists":
+            ctx = await bot.get_context(message)
+            command = bot.get_command("playlists")
+            await command(ctx)
+        elif message.content == "!spotify_logout":
+            ctx = await bot.get_context(message)
+            command = bot.get_command("spotify_logout")
+            await command(ctx)
         return
 
-    # have to implement
+    if isinstance(message.channel, discord.DMChannel):
+        return
+
+    # have to implement -> no need to do lol
     # if message.channel.id not in SPECIFIED_CHANNELS:
     #     return
 
     # if GLOBAL_COUNT == 0:
     #     return
 
+    if "!https://open.spotify.com/track/" in message.content:
+        return
+
     words = message.content.split()
 
-    for word in words:
-        if "!https://open.spotify.com/track/" in word:
-            return
+    # for word in words:
+    #     if "!https://open.spotify.com/track/" in word:
+    #         return
 
     spotify_track_regex = re.compile(r"https://open\.spotify\.com/track/([a-zA-Z0-9]+)")
 
@@ -342,6 +403,8 @@ async def on_message(message):
                 )
 
     del words
+
+    await bot.process_commands(message)
 
 
 # @bot.command(name="ping", brief="To check Bot's Status")
@@ -456,21 +519,34 @@ async def togglee(ctx):
     if ctx.author.id == int(CREATOR_ID):
         await ctx.send("!status")
 
+@bot.command(name="!spotify_logout", brief="status for bot")
+# @commands.is_owner()
+async def togglee(ctx):
+    if ctx.author.id == int(CREATOR_ID):
+        await ctx.send("!spotify_logout")
+
+@bot.command(name="!playlists", brief="status for bot")
+# @commands.is_owner()
+async def togglee(ctx):
+    if ctx.author.id == int(CREATOR_ID):
+        await ctx.send("!playlists")
 
 # async def fetch_
 
 
-@bot.command(name="plelists", brief="List this bot's playlists")
-async def plelists(ctx):
-    embed = discord.Embed(title="Bot's Playlists", color=0x1DB954)
-
-    for playlist_name, playlist_id in usersdb.get_playlist_ids(bot.user.id).items():
-        embed.add_field(
-            name=playlist_name,
-            value=f"[Open Playlist](https://open.spotify.com/playlist/{playlist_id})",
-            inline=False,
-        )
-    await ctx.message.reply(embed=embed, delete_after=120)
+# @bot.command(name="!playlists", brief="List this bot's playlists")
+# async def playylists(ctx):
+#     embed = discord.Embed(title="Bot's Playlists", color=0x1DB954)
+#     if not usersdb.get_user(bot.user.id):
+#         await ctx.message.reply("Bot is not logged in yet :(", delete_after=120)
+#         return
+#     for playlist_name, playlist_id in usersdb.get_playlist_ids(bot.user.id).items():
+#         embed.add_field(
+#             name=playlist_name,
+#             value=f"[Open Playlist](https://open.spotify.com/playlist/{playlist_id})",
+#             inline=False,
+#         )
+#     await ctx.message.reply(embed=embed, delete_after=120)
 
 
 @bot.command(name="spotify_login", brief="Login to Spotify")
@@ -505,7 +581,11 @@ async def spotify_login(ctx):
                         "Hey, big shot! I sent you the Spotify login link. Time to get your act together and log me in. Others, just hang in there for a sec.",
                         "Hey you! Spotify login link in your DMs. Quit messing around and log me in. The others can wait.",
                     ]
-                ),
+                )
+                + user.mention
+                + user.mention
+                + user.mention
+                + user.mention,
                 delete_after=120,
             )
 
@@ -563,12 +643,16 @@ async def spotify_login(ctx):
                         "Please delete the url for security reasons.", delete_after=120
                     )
                     await ctx.send("IM INNNNN BISSHHESS!")
-                    await ctx.send(random.choice([
-                        "From now on, I'll be adding all the songs you share in this server to my playlist. And guess what? Others who are logged in to me? Their playlists too. Better watch what you drop, it's going straight into the hall of bangers!",
-                        "Alright, listen up! Starting today, every track you share here is going straight into my playlist. Oh, and everyone else who's logged in? Yeah, their playlists too. Choose wisely, or suffer the consequences!",
-                        "You just stepped into my world. Every song you drop here is now in my playlist. So, share wisely, or prepare for a symphony of regret!",
-                    ]),
-                    delete_after=120)
+                    await ctx.send(
+                        random.choice(
+                            [
+                                "From now on, I'll be adding all the songs you share in this server to my playlist. And guess what? Others who are logged in to me? Their playlists too. Better watch what you drop, it's going straight into the hall of bangers!",
+                                "Alright, listen up! Starting today, every track you share here is going straight into my playlist. Oh, and everyone else who's logged in? Yeah, their playlists too. Choose wisely, or suffer the consequences!",
+                                "You just stepped into my world. Every song you drop here is now in my playlist. So, share wisely, or prepare for a symphony of regret!",
+                            ]
+                        ),
+                        delete_after=120,
+                    )
 
                 else:
                     await ctx.author.send(
@@ -662,8 +746,40 @@ async def spotify_logout(ctx):
     )
 
 
-@bot.command(name="playlists", brief="Lists your playlists")
+@bot.command(name="playlists", brief="Bot-made playlists 4 u")
 async def playlists(ctx):
+    if usersdb.get_user(ctx.author.id):
+        embed = discord.Embed(title="You x Bot", color=0x1DB954)
+        for playlist_name, playlist_id in usersdb.get_playlist_ids(
+            ctx.author.id
+        ).items():
+            embed.add_field(
+                name=playlist_name,
+                value=f"[Open Playlist](https://open.spotify.com/playlist/{playlist_id})",
+                inline=False,
+            )
+        await ctx.message.reply(embed=embed, delete_after=120)
+    else:
+        if ctx.author.id==bot.user.id:
+            await ctx.message.reply("Bot is not logged in yet :(", delete_after=120)
+        else:
+            await ctx.message.reply(
+                random.choice(
+                    [
+                        f"Bruh, you gotta log in with `{bot.command_prefix}spotify_login` first.",
+                        f"Yo, hit up `{bot.command_prefix}spotify_login` before using this command.",
+                        f"Bro, log in using `{bot.command_prefix}spotify_login` real quick.",
+                        f"Fam, make sure to `{bot.command_prefix}spotify_login` before using this command.",
+                        f"You need to log in with `{bot.command_prefix}spotify_login` before using this command.",
+                    ]
+                ),
+                delete_after=120,
+            )
+
+
+
+@bot.command(name="plelists", brief="your playlists(for testing)")
+async def plelists(ctx):
     if usersdb.get_user(ctx.author.id):
         sp = spotipy.Spotify(
             auth_manager=decrypt_data(usersdb.get_auth_manager(ctx.author.id))
@@ -709,12 +825,13 @@ class CustomHelpCommand(commands.DefaultHelpCommand):
         )
 
         for command in bot.commands:
-            embed.add_field(
-                name=f"`{bot.command_prefix}{command.name}`",
-                value=command.brief or "Shows this Message",
-                inline=True,
-            )
-        
+            if not command.name.startswith("!"):
+                embed.add_field(
+                    name=f"`{bot.command_prefix}{command.name}`",
+                    value=command.brief or "Shows this Message",
+                    inline=True,
+                )
+
         embed.add_field(
             name="Fun Fact:",
             value="Oh, and let me spill some tea - chief is still deciding if YouTube tracks are cool enough. Imagine, right?",
@@ -729,6 +846,7 @@ class CustomHelpCommand(commands.DefaultHelpCommand):
 
         channel = self.get_destination()
         await channel.send(embed=embed)
+
 
 def main():
     signal.signal(signal.SIGINT, exit_handler)

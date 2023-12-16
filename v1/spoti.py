@@ -15,7 +15,7 @@ client_id = SPOTIPY_CLIENT_ID
 redirect_uri = SPOTIPY_REDIRECT_URI
 
 # Create a SpotifyPKCE object with your credentials
-sp_oauth = SpotifyPKCE(username="hello",client_id=client_id, scope=scope,redirect_uri=redirect_uri,cache_handler=spotipy.MemoryCacheHandler(),open_browser=False)
+sp_oauth = SpotifyPKCE(username="hello",client_id=client_id, scope=scope,redirect_uri=redirect_uri,cache_handler=spotipy.MemoryCacheHandler())
 
 sp_oauth1 = SpotifyPKCE(username="hey",client_id=client_id, scope=scope,redirect_uri=redirect_uri,cache_handler=spotipy.MemoryCacheHandler(),open_browser=False)
 
@@ -39,9 +39,9 @@ print(type(sp_oauth))
 
 # token = spotipy.util.prompt_for_user_token("hello",scope,SPOTIPY_CLIENT_ID,SPOTIPY_CLIENT_SECRET,SPOTIPY_REDIRECT_URI)
 
-i=-1
+i=0
 # Use the access token to make API requests
-while True:
+if True:
     # print(token_info)
     # access_token = token
     i+=1
@@ -50,11 +50,14 @@ while True:
         print(sp_oauth.get_cached_token)
         print(sp.me()['id'])
 
-    else:
-        sp= spotipy.Spotify(auth_manager=sp_oauth1)
-        playlists = sp.current_user_playlists()
-        for playlist in playlists['items']:
-            print(playlist['name'])
+        playlist_tracks = sp.playlist('1nXyBudZQhuBbITwQy')
+        print(playlist_tracks)
+
+    # else:
+    #     sp= spotipy.Spotify(auth_manager=sp_oauth1)
+    #     playlists = sp.current_user_playlists()
+    #     for playlist in playlists['items']:
+    #         print(playlist['name'])
 
 
     # Now you can make API requests using the sp object
