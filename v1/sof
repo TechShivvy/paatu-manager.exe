@@ -1,0 +1,29 @@
+def create_spotify():
+    auth_manager = SpotifyOAuth(
+        scope=SCOPE,
+        username=USERNAME,
+        redirect_uri='http://localhost:8080',
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET)
+
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+
+    return auth_manager, spotify
+
+def refresh_spotify(auth_manager, spotify):
+    token_info = auth_manager.cache_handler.get_cached_token()
+    if auth_manager.is_token_expired(token_info):
+        auth_manager, spotify = create_spotify()
+    return auth_manager, spotify
+
+if __name__ == '__main__':
+    auth_manager, spotify = create_spotify()
+
+    while True:
+        auth_manager, spotify = refresh_spotify(auth_manager, spotify)
+        playing = spotify.currently_playing()
+        if playing:
+            print(playing['item']['name'])
+        else:
+            print('Nothing is playing.')
+        time.sleep(30)
