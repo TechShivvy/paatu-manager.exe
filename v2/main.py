@@ -372,8 +372,8 @@ async def status(ctx):
         )
 
 
-@bot.command(name="toggle_listen", brief="Toggles Listening status")
-async def toggle_listen(ctx):
+@bot.command(name="toggle", brief="Toggles Listening status")
+async def toggle(ctx):
     global GLOBAL_COUNT
     flag = usersdb.get_flag(ctx.author.id)
     if flag is not None:
