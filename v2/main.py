@@ -222,26 +222,26 @@ async def add_track_to_playlists(server_name, channel_name, track_id):
         # print(listener)
         playlist_name = f"{server_name}/{channel_name}"
         playlist_id = usersdb.get_playlist_id(listener, playlist_name)
-        print(playlist_id)
+        # print(playlist_id)
         sp = spotipy.Spotify(
             auth_manager=decrypt_data(usersdb.get_auth_manager(listener))
         )
         if playlist_id == False:
             # print("not there in db")
             for offset in range(0, 100001, 50):
-                print(1)
+                # print(1)
                 playlists = sp.current_user_playlists(limit=50, offset=offset)
                 if len(playlists["items"]) == 0 or playlist_id is not False:
                     break
                 for playlist in playlists["items"]:
                     # print(playlist["name"])
-                    print("for2")
+                    # print("for2")
                     if playlist["name"] == playlist_name:
                         playlist_id = playlist["id"]
                         break
 
             if playlist_id is False:
-                print("create1")
+                # print("create1")
                 playlist = sp.user_playlist_create(
                     sp.current_user()["id"],
                     playlist_name,
@@ -254,14 +254,12 @@ async def add_track_to_playlists(server_name, channel_name, track_id):
                 del playlist
         else:
             try:
-                print("try")
+                # print("try")
                 print(sp.playlist(playlist_id))
             except spotipy.exceptions.SpotifyException as e:
-                print("create2")
+                # print("create2")
                 # Playlist does not exist, create a new one
-                print(
-                    f"Playlist with ID {playlist_id} does not exist. Creating a new one."
-                )
+                # print(f"Playlist with ID {playlist_id} does not exist. Creating a new one.")
                 playlist = sp.user_playlist_create(
                     sp.current_user()["id"],
                     playlist_name,
@@ -289,12 +287,12 @@ async def add_track_to_playlists(server_name, channel_name, track_id):
         #     )
         #     del playlist
 
-        print("here")
+        # print("here")
         playlist_tracks = sp.playlist_tracks(playlist_id)
-        print(playlist_tracks)
+        # print(playlist_tracks)
         existing_track_ids = [item["track"]["id"] for item in playlist_tracks["items"]]
         # print(playlist_tracks)
-        print(existing_track_ids)
+        # print(existing_track_ids)
 
         if track_id in existing_track_ids:
             # print(f"Track with ID {track_id} is already in the playlist.")
@@ -519,11 +517,13 @@ async def statuss(ctx):
     if ctx.author.id == int(CREATOR_ID):
         await ctx.send("!status")
 
+
 @bot.command(name="!spotify_logout", brief="spotify logout 4 bot")
 # @commands.is_owner()
 async def spotify_logoutt(ctx):
     if ctx.author.id == int(CREATOR_ID):
         await ctx.send("!spotify_logout")
+
 
 # async def fetch_
 
@@ -754,7 +754,7 @@ async def playlists(ctx):
             )
         await ctx.message.reply(embed=embed, delete_after=120)
     else:
-        if ctx.author.id==bot.user.id:
+        if ctx.author.id == bot.user.id:
             await ctx.message.reply("Bot is not logged in yet :(", delete_after=120)
         else:
             await ctx.message.reply(
@@ -769,7 +769,6 @@ async def playlists(ctx):
                 ),
                 delete_after=120,
             )
-
 
 
 @bot.command(name="plelists", brief="your playlists(for testing)")
