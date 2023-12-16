@@ -330,8 +330,9 @@ async def on_message(message):
 
     words = message.content.split()
     
-    if "!https://open.spotify.com/track/" in words:
-        return
+    if word in words:
+        if "!https://open.spotify.com/track/" in word:
+            return
 
     spotify_track_regex = re.compile(r"https://open\.spotify\.com/track/([a-zA-Z0-9]+)")
 
