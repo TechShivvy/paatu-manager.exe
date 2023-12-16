@@ -330,7 +330,7 @@ async def on_message(message):
 
     words = message.content.split()
     
-    if word in words:
+    for word in words:
         if "!https://open.spotify.com/track/" in word:
             return
 
