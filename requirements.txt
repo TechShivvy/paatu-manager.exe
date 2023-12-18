@@ -1,4 +1,6 @@
 cryptography==41.0.7
 discord.py==2.3.2
+google_api_python_client==2.111.0
+google_auth_oauthlib==1.2.0
 python-dotenv==1.0.0
 spotipy==2.23.0
