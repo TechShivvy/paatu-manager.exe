@@ -3,3 +3,7 @@
 client_secrets.json
 
 yt.py
+
+v3/__pycache__
+
+v3/cogs/__pycache__
