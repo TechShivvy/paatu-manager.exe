@@ -1,70 +1,3 @@
-class ServerStore:
-    def __init__(self):
-        self.__servers = {}
-        print("ServerStore created")
-
-    def add_server(self, server_id, server_name):
-        if server_id not in self.__servers:
-            self.__servers[server_id] = {
-                "name": server_name,
-                "channels": {},
-                "users": UserStore(),
-            }
-            print(f"Added new server: {server_name} ({server_id})")
-        else:
-            print(f"Server {server_name} ({server_id}) already exists")
-
-    def add_channel(self, server_id, channel_id, channel_name, playlist_id=None):
-        if server_id in self.__servers:
-            self.__servers[server_id]["channels"][channel_id] = {
-                "channel_name": channel_name,
-                "playlist_id": playlist_id,
-                "flag": True,
-            }
-            print(f"Added channel {channel_id} in {server_id}")
-            return 1
-        else:
-            print(f"Server {server_id} not found")
-            return 0
-
-    def get_server(self, server_id):
-        return self.__servers.get(server_id, None)
-
-    def get_channel_info(self, server_id, channel_id):
-        if (
-            server_id in self.__servers
-            and channel_id in self.__servers[server_id]["channels"]
-        ):
-            return self.__servers[server_id]["channels"][channel_id]
-        else:
-            return None
-
-    def set_channel_flag(self, server_id, channel_id, flag):
-        if (
-            server_id in self.__servers
-            and channel_id in self.__servers[server_id]["channels"]
-        ):
-            self.__servers[server_id]["channels"][channel_id]["flag"] = flag
-            return True
-        else:
-            return None
-
-    def set_channel_playlist(self, server_id, channel_id, playlist_id):
-        if (
-            server_id in self.__servers
-            and channel_id in self.__servers[server_id]["channels"]
-        ):
-            self.__servers[server_id]["channels"][channel_id][
-                "playlist_id"
-            ] = playlist_id
-            return True
-        else:
-            return None
-
-    def __del__(self):
-        print("ServerStore deleted")
-
-
 class UserStore:
     def __init__(self):
         self.__users = {}
@@ -134,3 +67,73 @@ class UserStore:
 
     def __del__(self):
         print("UserStore deleted")
+
+
+class ServerStore:
+    def __init__(self, where=None):
+        self.__servers = {}
+        print("ServerStore created", where)
+
+    def add_server(self, server_id, server_name):
+        if server_id not in self.__servers:
+            self.__servers[server_id] = {
+                "name": server_name,
+                "channels": {},
+                "users": UserStore(),
+            }
+            print(f"Added new server: {server_name} ({server_id})")
+        else:
+            print(f"Server {server_name} ({server_id}) already exists")
+
+    def add_channel(self, server_id, channel_id, channel_name, playlist_id=None):
+        if server_id in self.__servers:
+            self.__servers[server_id]["channels"][channel_id] = {
+                "channel_name": channel_name,
+                "playlist_id": playlist_id,
+                "flag": True,
+            }
+            print(f"Added channel {channel_id} in {server_id}")
+            return 1
+        else:
+            print(f"Server {server_id} not found")
+            return 0
+
+    def get_server(self, server_id) -> dict[str, UserStore]: #not correct typehint, but works so 
+        return self.__servers.get(server_id, None)
+
+    def get_channel_info(self, server_id, channel_id):
+        if (
+            server_id in self.__servers
+            and channel_id in self.__servers[server_id]["channels"]
+        ):
+            return self.__servers[server_id]["channels"][channel_id]
+        else:
+            return None
+
+    def set_channel_flag(self, server_id, channel_id, flag):
+        if (
+            server_id in self.__servers
+            and channel_id in self.__servers[server_id]["channels"]
+        ):
+            self.__servers[server_id]["channels"][channel_id]["flag"] = flag
+            return True
+        else:
+            return None
+
+    def set_channel_playlist(self, server_id, channel_id, playlist_id):
+        if (
+            server_id in self.__servers
+            and channel_id in self.__servers[server_id]["channels"]
+        ):
+            self.__servers[server_id]["channels"][channel_id][
+                "playlist_id"
+            ] = playlist_id
+            return True
+        else:
+            return None
+
+    def __del__(self):
+        print("ServerStore deleted")
+
+
+serversdb = ServerStore()

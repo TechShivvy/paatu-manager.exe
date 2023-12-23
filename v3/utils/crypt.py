@@ -1,4 +1,7 @@
-from imports import Fernet, pickle
+import pickle
+
+
+from cryptography.fernet import Fernet
 
 cipher_suite = Fernet(Fernet.generate_key())
 
