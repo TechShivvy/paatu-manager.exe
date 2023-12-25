@@ -16,14 +16,6 @@ class UserStore:
         print(f"added new user: {id}")
 
     def get_or_set_channel(self, user_id, channel_id, channel_name):
-        # if channel_id not in self.__users[user_id]["channels"].keys():
-        #     self.__users[user_id]["channels"][channel_id] = {
-        #         "name": channel_name,
-        #         "playlists": {"spotify": "", "youtube": ""},
-        #         "flag": True,
-        #     }
-        #     return True
-        # return False
 
         return self.__users[user_id]["channels"].setdefault(
             channel_id,
@@ -180,44 +172,5 @@ class ServerStore:
         else:
             return False
 
-    # def get_server(self, server_id) -> dict[str, UserStore]: #not correct typehint, but works so
-    #     return self.__servers.get(server_id, None)
-
-    # def get_channel_info(self, server_id, channel_id):
-    #     if (
-    #         server_id in self.__servers
-    #         and channel_id in self.__servers[server_id]["channels"]
-    #     ):
-    #         return self.__servers[server_id]["channels"][channel_id]
-    #     else:
-    #         return None
-
-    # def set_channel_flag(self, server_id, channel_id, flag):
-    #     if (
-    #         server_id in self.__servers
-    #         and channel_id in self.__servers[server_id]["channels"]
-    #     ):
-    #         self.__servers[server_id]["channels"][channel_id]["flag"] = flag
-    #         return True
-    #     else:
-    #         return None
-
-    # def set_channel_playlist(self, server_id, channel_id, playlist_id, which):
-    #     if which != "spotify" or which != "youtube":
-    #         return False
-    #     if (
-    #         server_id in self.__servers
-    #         and channel_id in self.__servers[server_id]["channels"]
-    #     ):
-    #         self.__servers[server_id]["channels"][channel_id]["playlist_id"][
-    #             which
-    #         ] = playlist_id
-    #         return True
-    #     else:
-    #         return None
-
     def __del__(self):
         print("ServerStore deleted")
-
-
-# serversdb = ServerStore()

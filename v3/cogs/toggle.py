@@ -15,10 +15,8 @@ class Toggle(commands.Cog):
     @commands.command(
         name="!toggle_server", brief="Toggles Bot's servers Listening status"
     )
-    # @commands.is_owner()
     @commands.has_permissions(administrator=True)
     async def toggleeee(self, ctx: commands.Context):
-        # await ctx.send("!spotify_login")
         await self.bot.get_command("toggle_server")(ctx)
 
     @commands.command(name="toggle_server", brief="Toggles server's Listening status")
@@ -26,7 +24,6 @@ class Toggle(commands.Cog):
         ctxx = self.bot.user if ctx.message.content == "!!toggle_server" else ctx.author
         flag = self.bot.serversdb.get_server_users(ctx.guild.id).get_flag(ctxx.id)
         if flag is not None:
-            # GLOBAL_COUNT += -1 if flag else 1
             self.bot.serversdb.get_server_users(ctx.guild.id).toggle_flag(ctxx.id)
             await ctx.message.reply(
                 f"Server's Listening flag toggled.\nNow **{'listening' if not flag else 'not listening'}**.",
@@ -51,10 +48,8 @@ class Toggle(commands.Cog):
     @commands.command(
         name="!toggle_channel", brief="Toggles Bot's channels Listening status"
     )
-    # @commands.is_owner()
     @commands.has_permissions(administrator=True)
     async def togglee(self, ctx: commands.Context):
-        # await ctx.send("!spotify_login")
         await self.bot.get_command("toggle_channel")(ctx)
 
     @commands.command(name="toggle_channel", brief="Toggles channels Listening status")
@@ -66,7 +61,6 @@ class Toggle(commands.Cog):
             ctxx.id, ctx.channel.id, ctx.channel.name
         )
         if flag is not None:
-            # GLOBAL_COUNT += -1 if flag else 1
             self.bot.serversdb.get_server_users(ctx.guild.id).toggle_flag(
                 ctxx.id, ctx.channel.id, ctx.channel.name
             )
@@ -91,10 +85,8 @@ class Toggle(commands.Cog):
             )
 
     @commands.command(name="!status", brief="Shows Bot's listening status")
-    # @commands.is_owner()
     @commands.has_permissions(administrator=True)
     async def statuss(self, ctx: commands.Context):
-        # await ctx.send("!spotify_login")
         await self.bot.get_command("status")(ctx)
 
     @commands.command(name="status", brief="Shows listening status")
@@ -134,10 +126,8 @@ class Toggle(commands.Cog):
             )
 
     @commands.command(name="!supply", brief="Check Power for bot")
-    # @commands.is_owner()
     @commands.has_permissions(administrator=True)
     async def supply(self, ctx: commands.Context):
-        # await ctx.send("!spotify_login")
         flag = self.bot.serversdb.get_flag(ctx.guild.id)
         if flag is not None:
             await ctx.message.reply(
@@ -146,13 +136,10 @@ class Toggle(commands.Cog):
             )
 
     @commands.command(name="!power", brief="Power off/on Bot")
-    # @commands.is_owner()
     @commands.has_permissions(administrator=True)
     async def power(self, ctx: commands.Context):
-        # await ctx.send("!spotify_login")
         flag = self.bot.serversdb.get_flag(ctx.guild.id)
         if flag is not None:
-            # GLOBAL_COUNT += -1 if flag else 1
             self.bot.serversdb.toggle_flag(ctx.guild.id)
             await ctx.message.reply(
                 f"Bot is now switched **{'on' if not flag else 'off'}**.",

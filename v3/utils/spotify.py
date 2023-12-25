@@ -26,17 +26,11 @@ async def add_track_to_playlists(
     which,
 ):
     try:
-        # print(serversdb._ServerStore__servers)
-        # print(server_id, channel_id, server_name, channel_name, track_id, which)
-        # print(serversdb.get_flag(server_id))
-        # print(serversdb._ServerStore__servers[server_id]["flag"])
-        # print(server_id in serversdb._ServerStore__servers)
         if not serversdb.get_flag(server_id):
             print("no flag")
             return False
 
         has_run_once = False
-        # print(server_name, channel_name, track_id)
         for listener in serversdb.get_server_users(server_id).get_active_listeners(
             channel_id, channel_name
         ):
@@ -69,8 +63,6 @@ async def add_track_to_playlists(
                         print(sp.playlist(playlist_id))
                 except spotipy.exceptions.SpotifyException as e:
                     print("create2")
-                    # Playlist does not exist, create a new one
-                    # print(f"Playlist with ID {playlist_id} does not exist. Creating a new one.")
                     playlist = sp.user_playlist_create(
                         sp.current_user()["id"],
                         f"{server_name}/{channel_name}",
@@ -107,8 +99,8 @@ async def add_track_to_playlists(
 
         return has_run_once
 
-    # except Exception as e:
-    #     print(f"Error {e} while adding tracks to playlists")
+    except Exception as e:
+        print(f"Error {e} while adding tracks to playlists")
 
     finally:
         print("finally in adding tracks")

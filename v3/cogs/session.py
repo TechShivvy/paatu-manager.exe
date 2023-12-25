@@ -21,43 +21,7 @@ class Session(commands.Cog):
         # await ctx.send("!spotify_login")
         await self.bot.get_command("spotify_login")(ctx)
 
-        # def check(message: discord.Message):
-        #     return (
-        #         message.author.id == self.bot.user.id
-        #         and message.channel.id == ctx.channel.id
-        #         and message.content == "IM INNNNN BISSHHESS!"
-        #     )
-
-        # try:
-        #     message = await self.bot.wait_for("message", check=check, timeout=60)
-
-        # await ctx.send('Received response: ' + response.content)
-
-        # sp = spotipy.Spotify(
-        #     auth_manager=decrypt_data(
-        #         self.bot.serversdb.get_server(ctx.guild.id)["users"].get_auth_manager(
-        #             self.bot.user.id
-        #         )
-        #     )
-        # )
-        # for offset in range(0, 100001, 50):
-        #     playlists = sp.current_user_playlists(limit=50, offset=offset)
-        #     for playlist in playlists["items"]:
-        #         # if f"{message.guild.name}/" in playlist["name"]:
-        #         usersdb.set_playlist_id(
-        #             self.bot.user.id, playlist["name"], playlist["id"]
-        #         )
-        #     if len(playlists["items"]) == 0:
-        #         break
-
-        # except asyncio.TimeoutError:
-        #     print("Timeout reached. No response to !spotify_login.")
-
-        # except Exception as e:
-        #     print(f"Error:{e}")
-
     @commands.command(name="!spotify_logout", brief="spotify logout 4 bot")
-    # @commands.is_owner()
     @commands.has_permissions(administrator=True)
     async def deinit(self, ctx: commands.Context):
         await self.bot.get_command("spotify_logout")(ctx)
@@ -149,8 +113,6 @@ class Session(commands.Cog):
                 )
 
                 if access_token:
-                    # users[ctx.author.id] = encrypt_data(access_token)
-                    # users[ctx.author.id]['flag']=True
                     self.bot.serversdb.get_server_users(ctx.guild.id).add_user(
                         ctxx.id, encrypt_data(auth_manager)
                     )
@@ -192,8 +154,6 @@ class Session(commands.Cog):
                                         self.bot.get_channel(channel_id).name,
                                     )
 
-                    # print(self.bot.serversdb._ServerStore__servers[ctx.guild.id]["users"])
-
                     if ctxx == self.bot.user:
                         await ctx.send("IM INNNNN BISSHHESS!")
                         await ctx.send(
@@ -211,12 +171,7 @@ class Session(commands.Cog):
                         "Failed to get access token.", delete_after=120
                     )
 
-                # del auth_manager
-                # del access_token
-                # del message
-                # del sp
 
-                # print(users)
             except TimeoutError:
                 await ctx.author.send(
                     "Login timeout. Please try again.", delete_after=120

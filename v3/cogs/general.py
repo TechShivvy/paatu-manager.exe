@@ -14,9 +14,6 @@ class General(commands.Cog):
         #     bot.serversdb, ServerStore
         # ), "bot.serversdb must be an instance of ServerStore"
 
-        # # self.bot = bot
-        # # if isinstance(bot, commands.Bot):
-        # self.bot = bot
         # if isinstance(bot.serversdb, ServerStore):
         #     self.bot.serversdb: ServerStore = bot.serversdb
         # super().__init__()
@@ -25,7 +22,6 @@ class General(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        # self.bot.serversdb: ServerStore
         await self.bot.wait_until_ready()
         # await self.bot.tree.sync()
         guild_count = 0

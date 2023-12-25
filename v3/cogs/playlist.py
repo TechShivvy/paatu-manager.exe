@@ -13,10 +13,7 @@ class Playlist(commands.Cog):
         self.bot.serversdb: ServerStore
 
     @commands.command(name="!playlists", brief="Shows Bot's Playlists")
-    # @commands.is_owner()
-    # @commands.has_permissions(administrator=True)
     async def playlistss(self, ctx: commands.Context):
-        # await ctx.send("!spotify_login")
         await self.bot.get_command("playlists")(ctx)
 
     @commands.command(name="playlists", brief="Shows You x Bot Playlists")
@@ -49,9 +46,6 @@ class Playlist(commands.Cog):
                         inline=False,
                     )
 
-            # Sending the embeds
-            # await ctx.send(embed=embed1)
-            # await ctx.send(embed=embed2)
             if not embed1.fields and not embed2.fields:
                 await ctx.message.reply("No playlists found.")
             else:
