@@ -222,5 +222,5 @@ class Session(commands.Cog):
         )
 
 
-async def setup(bot):
+async def setup(bot: CustomBot):
     await bot.add_cog(Session(bot))

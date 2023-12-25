@@ -17,7 +17,7 @@ class Playlist(commands.Cog):
         await self.bot.get_command("playlists")(ctx)
 
     @commands.command(name="playlists", brief="Shows You x Bot Playlists")
-    async def playlists(self, ctx):
+    async def playlists(self, ctx : commands.Context):
         ctxx = self.bot.user if ctx.message.content == "!!playlists" else ctx.author
         if self.bot.serversdb.get_server_users(ctx.guild.id).get_user(ctxx.id):
             embed1 = discord.Embed(title="Spotify", color=0x1DB954)
@@ -72,5 +72,5 @@ class Playlist(commands.Cog):
                 )
 
 
-async def setup(bot):
+async def setup(bot: CustomBot):
     await bot.add_cog(Playlist(bot))

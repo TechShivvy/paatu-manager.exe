@@ -20,7 +20,7 @@ class Toggle(commands.Cog):
         await self.bot.get_command("toggle_server")(ctx)
 
     @commands.command(name="toggle_server", brief="Toggles server's Listening status")
-    async def toggleee(self, ctx):
+    async def toggleee(self, ctx: commands.Context):
         ctxx = self.bot.user if ctx.message.content == "!!toggle_server" else ctx.author
         flag = self.bot.serversdb.get_server_users(ctx.guild.id).get_flag(ctxx.id)
         if flag is not None:
@@ -53,7 +53,7 @@ class Toggle(commands.Cog):
         await self.bot.get_command("toggle_channel")(ctx)
 
     @commands.command(name="toggle_channel", brief="Toggles channels Listening status")
-    async def toggle(self, ctx):
+    async def toggle(self, ctx: commands.Context):
         ctxx = (
             self.bot.user if ctx.message.content == "!!toggle_channel" else ctx.author
         )
@@ -90,7 +90,7 @@ class Toggle(commands.Cog):
         await self.bot.get_command("status")(ctx)
 
     @commands.command(name="status", brief="Shows listening status")
-    async def status(self, ctx):
+    async def status(self, ctx: commands.Context):
         ctxx = self.bot.user if ctx.message.content == "!!status" else ctx.author
         flag_server = self.bot.serversdb.get_server_users(ctx.guild.id).get_flag(
             ctxx.id
