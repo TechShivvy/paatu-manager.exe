@@ -10,6 +10,7 @@ import sys
 
 import asyncio
 import discord
+from discord import Interaction
 from discord.ext import commands
 
 import spotipy

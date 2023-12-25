@@ -179,7 +179,7 @@ class UserStore:
         print("UserStore deleted")
 
 
-# usersdb = UserStore()
+usersdb = UserStore()
 
 
 @atexit.register

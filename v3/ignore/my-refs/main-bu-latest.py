@@ -3,7 +3,6 @@ from utils.crypt import *
 from discord import app_commands
 from db import ServerStore
 from utils.spotify import add_track_to_playlists
-from mybot import CustomBot
 
 load_dotenv()
 
@@ -16,19 +15,7 @@ intents = discord.Intents.all()
 intents.message_content = True
 intents.members = True
 
-
-# class CustomBot(commands.Bot):
-#     def __init__(
-#         self,
-#         *args,
-#         serversdb: ServerStore,
-#         **kwargs,
-#     ):
-#         super().__init__(*args, **kwargs)
-#         self.serversdb = serversdb
-
-
-bot = CustomBot(command_prefix="!", intents=intents, serversdb="")
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 
 def exit_handler(signum, frame):
@@ -167,7 +154,7 @@ async def main():
     try:
         async with bot:
             bot.help_command = CustomHelpCommand()
-            # bot.serversdb: ServerStore = ServerStore()
+            bot.serversdb: ServerStore = ServerStore()
 
             await load()
             await bot.start(os.getenv("DISCORD_BOT_ID"))

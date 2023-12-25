@@ -6,10 +6,12 @@ import random
 from utils.spotify import create_auth_manager
 from utils.crypt import *
 from db import *
+import re
+from mybot import CustomBot
 
 
 class Session(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: CustomBot):
         self.bot = bot
 
     @commands.command(name="!spotify_login", brief="init bot account")
@@ -19,31 +21,40 @@ class Session(commands.Cog):
         # await ctx.send("!spotify_login")
         await self.bot.get_command("spotify_login")(ctx)
 
-        def check(message: discord.Message):
-            return (
-                message.author.id == self.bot.user.id
-                and message.channel.id == ctx.channel.id
-                and message.content == "IM INNNNN BISSHHESS!"
-            )
+        # def check(message: discord.Message):
+        #     return (
+        #         message.author.id == self.bot.user.id
+        #         and message.channel.id == ctx.channel.id
+        #         and message.content == "IM INNNNN BISSHHESS!"
+        #     )
 
-        try:
-            message = await self.bot.wait_for("message", check=check, timeout=60)
+        # try:
+        #     message = await self.bot.wait_for("message", check=check, timeout=60)
 
-            # await ctx.send('Received response: ' + response.content)
+        # await ctx.send('Received response: ' + response.content)
 
-            # sp = spotipy.Spotify(
-            #     auth_manager=decrypt_data(usersdb.get_auth_manager(self.bot.user.id))
-            # )
-            # for offset in range(0, 100001, 50):
-            #     playlists = sp.current_user_playlists(limit=50, offset=offset)
-            #     for playlist in playlists["items"]:
-            #         # if f"{message.guild.name}/" in playlist["name"]:
-            #         usersdb.set_playlist_id(self.bot.user.id, playlist["name"], playlist["id"])
-            #     if len(playlists["items"]) == 0:
-            #         break
+        # sp = spotipy.Spotify(
+        #     auth_manager=decrypt_data(
+        #         self.bot.serversdb.get_server(ctx.guild.id)["users"].get_auth_manager(
+        #             self.bot.user.id
+        #         )
+        #     )
+        # )
+        # for offset in range(0, 100001, 50):
+        #     playlists = sp.current_user_playlists(limit=50, offset=offset)
+        #     for playlist in playlists["items"]:
+        #         # if f"{message.guild.name}/" in playlist["name"]:
+        #         usersdb.set_playlist_id(
+        #             self.bot.user.id, playlist["name"], playlist["id"]
+        #         )
+        #     if len(playlists["items"]) == 0:
+        #         break
 
-        except asyncio.TimeoutError:
-            print("Timeout reached. No response to !spotify_login.")
+        # except asyncio.TimeoutError:
+        #     print("Timeout reached. No response to !spotify_login.")
+
+        # except Exception as e:
+        #     print(f"Error:{e}")
 
     @commands.command(name="!spotify_logout", brief="spotify logout 4 bot")
     # @commands.is_owner()
@@ -59,7 +70,7 @@ class Session(commands.Cog):
                 if ctx.message.content == "!!spotify_login"
                 else ctx.author
             )
-            if serversdb.get_server(ctx.guild.id)["users"].get_user(ctxx.id):
+            if self.bot.serversdb.get_server_users(ctx.guild.id).get_user(ctxx.id):
                 await ctx.message.reply("You are already logged in!", delete_after=120)
                 return
 
@@ -108,6 +119,29 @@ class Session(commands.Cog):
                     message.channel, discord.DMChannel
                 )
 
+            def parse_playlist_description(playlist_description):
+                print(playlist_description)
+                pattern = r"List of tracks shared in {([^}]+)} - pme"
+                match = re.match(pattern, playlist_description)
+
+                if match:
+                    server_and_channel = match.group(1)
+                    server_and_channel_parts = server_and_channel.replace(
+                        " &gt;&gt;&gt; ", " >>> "
+                    ).split(" >>> ")
+                    print(server_and_channel_parts)
+                    if len(server_and_channel_parts) == 2:
+                        server_id_str, channel_id_str = server_and_channel_parts
+                        print(server_id_str, channel_id_str)
+                        try:
+                            return int(server_id_str.split()[0]), int(
+                                channel_id_str.split()[0]
+                            )
+                        except ValueError:
+                            return None, None
+
+                return None
+
             try:
                 message = await self.bot.wait_for("message", check=check, timeout=60)
                 access_token = auth_manager.get_access_token(
@@ -117,10 +151,10 @@ class Session(commands.Cog):
                 if access_token:
                     # users[ctx.author.id] = encrypt_data(access_token)
                     # users[ctx.author.id]['flag']=True
-                    serversdb.get_server(ctx.guild.id)["users"].add_user(
+                    self.bot.serversdb.get_server_users(ctx.guild.id).add_user(
                         ctxx.id, encrypt_data(auth_manager)
                     )
-                    sp = spotipy.Spotify(auth=access_token)
+                    sp = spotipy.Spotify(auth_manager=auth_manager)
 
                     user_info = sp.current_user()
 
@@ -133,6 +167,32 @@ class Session(commands.Cog):
                     await ctx.author.send(
                         "Please delete the url for security reasons.", delete_after=120
                     )
+
+                    for offset in range(0, 100001, 50):
+                        print("haha")
+                        playlists = sp.current_user_playlists(limit=50, offset=offset)
+                        print(playlists)
+                        if len(playlists["items"]) == 0:
+                            break
+                        for playlist in playlists["items"]:
+                            result = parse_playlist_description(playlist["description"])
+                            if result:
+                                print("yes")
+                                server_id, channel_id = result
+                                print(server_id, channel_id)
+                                if server_id == ctx.guild.id:
+                                    print("yes")
+                                    self.bot.serversdb.get_server_users(
+                                        server_id
+                                    ).set_playlist_id(
+                                        ctxx.id,
+                                        "spotify",
+                                        channel_id,
+                                        playlist["id"],
+                                        self.bot.get_channel(channel_id).name,
+                                    )
+
+                    # print(self.bot.serversdb._ServerStore__servers[ctx.guild.id]["users"])
 
                     if ctxx == self.bot.user:
                         await ctx.send("IM INNNNN BISSHHESS!")
@@ -174,15 +234,13 @@ class Session(commands.Cog):
                         delete_after=120,
                     )
             finally:
-                del user_info, message, access_token
+                del user_info, message, access_token, auth_manager, sp
 
         except spotipy.SpotifyException as e:
             await ctx.author.send(
                 f"Error during Spotify authentication: {e}. [Please note that this application is currently in development mode, and access is limited to users registered on the app's dashboard. The app can accommodate a maximum of 25 users, and only those registered users have access to this self.bot. If you want to use it, please DM the creator your Spotify email.]",
                 delete_after=120,
             )
-        finally:
-            del auth_manager, sp
 
     @commands.command(name="spotify_logout", brief="Logout from Spotify")
     async def spotify_logout(self, ctx: commands.Context):
@@ -198,7 +256,7 @@ class Session(commands.Cog):
                     "Peace out ho! You're logged the f out.",
                 ]
             )
-            if (serversdb.get_server(ctx.guild.id)["users"]).del_user(ctxx.id)
+            if (self.bot.serversdb.get_server_users(ctx.guild.id)).del_user(ctxx.id)
             else random.choice(
                 [
                     "Bruh, you ain't even logged in to logout. Get it together.",

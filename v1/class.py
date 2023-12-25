@@ -29,3 +29,5 @@ if __name__ == "__main__":
     x.add(1)
     if (b := x.getarr(1)["arr"]) and isinstance(b, B):
         b.function()
+y=B()
+print(y._B__list)

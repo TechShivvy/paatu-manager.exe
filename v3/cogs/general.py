@@ -1,26 +1,38 @@
 import discord
-from discord import Guild
+from discord import Guild, app_commands
 from discord.ext import commands
 from sys import stdout
-from db import *
+from db import ServerStore
+from mybot import CustomBot
 
 
 class General(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        # self.bot = bot
-        # if isinstance(bot, commands.Bot):
+    def __init__(self, bot: CustomBot):
         self.bot = bot
+        # self.bot.serversdb: ServerStore  # Optional type hint, may not change color
+        # assert isinstance(
+        #     bot.serversdb, ServerStore
+        # ), "bot.serversdb must be an instance of ServerStore"
+
+        # # self.bot = bot
+        # # if isinstance(bot, commands.Bot):
+        # self.bot = bot
+        # if isinstance(bot.serversdb, ServerStore):
+        #     self.bot.serversdb: ServerStore = bot.serversdb
+        # super().__init__()
         # else:
         #     raise ValueError("The 'bot' parameter must be an instance of commands.Bot.")
 
     @commands.Cog.listener()
     async def on_ready(self):
+        # self.bot.serversdb: ServerStore
         await self.bot.wait_until_ready()
+        # await self.bot.tree.sync()
         guild_count = 0
 
         for guild in self.bot.guilds:
             print(f"- {guild.id} (name: {guild.name})", flush=True)
-            serversdb.add_server(guild.id, guild.name)
+            self.bot.serversdb.add_server(guild.id, guild.name)
             guild_count += 1
 
         print("paatu-manager.exe is in " + str(guild_count) + " guilds.")
@@ -34,7 +46,7 @@ class General(commands.Cog):
         print("Bot has been added to a new server")
         print("List of servers the bot is in: ")
 
-        serversdb.add_server(guild.id, guild.name)
+        self.bot.serversdb.add_server(guild.id, guild.name)
 
         for guild in self.bot.guilds:
             print(f"- {guild.id} (name: {guild.name})")
@@ -43,7 +55,8 @@ class General(commands.Cog):
         print("++++++")
 
     @commands.command(name="ping", brief="To check Bot's Status")
-    async def ping(self, ctx):
+    # @commands.hybrid_command(name="ping", brief="To check Bot's ping")
+    async def ping(self, ctx: commands.Context):
         await ctx.message.reply(f"Pong!...{self.bot.latency*1000}", delete_after=120)
 
     @commands.command(name="ding", brief="To test cogs' reload")
@@ -51,7 +64,7 @@ class General(commands.Cog):
         await ctx.message.reply("Dong!", delete_after=120)
 
     @commands.command(name="about", brief="About the bot")
-    async def ding(self, ctx):
+    async def about(self, ctx: commands.Context):
         embed = discord.Embed(title="About:", color=0x3498DB)
         embed.add_field(
             name="",
@@ -73,6 +86,27 @@ class General(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    # @app_commands.command()
+    # @app_commands.describe(
+    #     first_value="The first value you want to add something to",
+    #     second_value="The value you want to add to the first value",
+    # )
+    # async def add(
+    #     self, interaction: discord.Interaction, first_value: int, second_value: int
+    # ):
+    #     """Adds two numbers together."""
+    #     await interaction.response.send_message(
+    #         f"{first_value} + {second_value} = {first_value + second_value}",
+    #         ephemeral=True,
+    #     )
+    #     message = await interaction.original_response()
+    #     print(message)
 
-async def setup(bot: commands.Bot):
+    @commands.command(name="sync")
+    async def sync(self, ctx: commands.Context):
+        synced = await self.bot.tree.sync()
+        print(f"Synced {len(synced)} command(s).")
+
+
+async def setup(bot: CustomBot):
     await bot.add_cog(General(bot))
