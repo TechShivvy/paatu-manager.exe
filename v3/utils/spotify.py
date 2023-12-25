@@ -27,25 +27,25 @@ async def add_track_to_playlists(
 ):
     try:
         if not serversdb.get_flag(server_id):
-            print("no flag")
+            # print("no flag")
             return False
 
         has_run_once = False
         for listener in serversdb.get_server_users(server_id).get_active_listeners(
             channel_id, channel_name
         ):
-            print(listener)
+            # print(listener)
             playlist_id = serversdb.get_server_users(server_id).get_playlist_id(
                 listener, channel_id, channel_name, which
             )
-            print(playlist_id)
+            # print(playlist_id)
             sp = spotipy.Spotify(
                 auth_manager=decrypt_data(
                     serversdb.get_server_users(server_id).get_auth_manager(listener)
                 )
             )
             if playlist_id == "":
-                print("create1")
+                # print("create1")
                 playlist = sp.user_playlist_create(
                     sp.current_user()["id"],
                     f"{server_name}/{channel_name}",
@@ -53,16 +53,17 @@ async def add_track_to_playlists(
                     False,
                     description=f"List of tracks shared in {{{server_id} >>> {channel_id}}} - pme",
                 )
-                print(playlist)
+                # print(playlist)
                 playlist_id = playlist["id"]
                 del playlist
             else:
                 try:
-                    print("try")
+                    # print("try")
                     if playlist_id != "":
-                        print(sp.playlist(playlist_id))
+                        pass
+                        # print(sp.playlist(playlist_id))
                 except spotipy.exceptions.SpotifyException as e:
-                    print("create2")
+                    # print("create2")
                     playlist = sp.user_playlist_create(
                         sp.current_user()["id"],
                         f"{server_name}/{channel_name}",
@@ -80,8 +81,8 @@ async def add_track_to_playlists(
             existing_track_ids = [
                 item["track"]["id"] for item in playlist_tracks["items"]
             ]
-            print(playlist_tracks)
-            print(existing_track_ids)
+            # print(playlist_tracks)
+            # print(existing_track_ids)
 
             if track_id in existing_track_ids:
                 pass
@@ -103,4 +104,5 @@ async def add_track_to_playlists(
         print(f"Error {e} while adding tracks to playlists")
 
     finally:
-        print("finally in adding tracks")
+        pass
+        # print("finally in adding tracks")

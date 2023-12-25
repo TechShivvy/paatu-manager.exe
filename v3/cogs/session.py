@@ -84,7 +84,7 @@ class Session(commands.Cog):
                 )
 
             def parse_playlist_description(playlist_description):
-                print(playlist_description)
+                # print(playlist_description)
                 pattern = r"List of tracks shared in {([^}]+)} - pme"
                 match = re.match(pattern, playlist_description)
 
@@ -93,10 +93,10 @@ class Session(commands.Cog):
                     server_and_channel_parts = server_and_channel.replace(
                         " &gt;&gt;&gt; ", " >>> "
                     ).split(" >>> ")
-                    print(server_and_channel_parts)
+                    # print(server_and_channel_parts)
                     if len(server_and_channel_parts) == 2:
                         server_id_str, channel_id_str = server_and_channel_parts
-                        print(server_id_str, channel_id_str)
+                        # print(server_id_str, channel_id_str)
                         try:
                             return int(server_id_str.split()[0]), int(
                                 channel_id_str.split()[0]
@@ -131,19 +131,19 @@ class Session(commands.Cog):
                     )
 
                     for offset in range(0, 100001, 50):
-                        print("haha")
+                        # print("haha")
                         playlists = sp.current_user_playlists(limit=50, offset=offset)
-                        print(playlists)
+                        # print(playlists)
                         if len(playlists["items"]) == 0:
                             break
                         for playlist in playlists["items"]:
                             result = parse_playlist_description(playlist["description"])
                             if result:
-                                print("yes")
+                                # print("yes")
                                 server_id, channel_id = result
-                                print(server_id, channel_id)
+                                # print(server_id, channel_id)
                                 if server_id == ctx.guild.id:
-                                    print("yes")
+                                    # print("yes")
                                     self.bot.serversdb.get_server_users(
                                         server_id
                                     ).set_playlist_id(
